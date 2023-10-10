@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import rateLimit from "express-rate-limit";
 import EnvConfig from "./config/env.config";
-import apiRouter from "./routes/index.router";
+import apiRouter from "./routes/index.route";
 import { runSeeders } from "./seeders/index.seeder";
 import ExpressMongoSanitize = require("express-mongo-sanitize");
 import express = require("express");
@@ -14,16 +14,13 @@ import logger from "./config/logger.config";
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
-const xss = require('xss-clean');
-const hpp = require('hpp');
 const compression = require('compression');
 const cors = require('cors');
-const httpStatus = require('http-status');
 const publicContent = require('../app.json');
 const PORT = EnvConfig.APP_PORT || 9000;
 
 const corsAllowedOrigins = [
-    'http://localhost:3000',
+    'http://localhost:8084',
 ]
 
 const corsOptions = {
@@ -59,9 +56,7 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Sanitize requests data
-app.use(xss());
 app.use(ExpressMongoSanitize());
-app.use(hpp())
 
 // gzip compression
 app.use(compression());
@@ -72,8 +67,9 @@ if (EnvConfig.env === 'production') {
 }
 
 // Enable CORS for all requests
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(cors());
+// app.options('*', cors(corsOptions));
 
 // JWT authentication
 passportConfig(passport);
@@ -90,6 +86,22 @@ app.get('/', (_, res) => {
 // Initialize database
 initializeDB(runSeeders);
 
+app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+
+    if (isNaN(Number(error.statusCode))) {
+        var stack = error.stack;
+    }
+
+    logger.error(`Error ${error.statusCode}: ${error.message} ${stack ? 'Stack' + stack : ''}`, { url: req.url, method: req.method },);
+
+    const statusCode = error.statusCode || 500;
+
+    return res.status(statusCode).json({
+        success: false,
+        error: statusCode === 500 ? 'Internal Server Error' : error.message
+    });
+});
+
 app.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`);
+    logger.info(`App has been successfully started on port ${PORT}`);
 })

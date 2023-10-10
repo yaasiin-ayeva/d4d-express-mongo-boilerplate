@@ -14,6 +14,11 @@ const EnvConfig = {
     SMTP_PASSWORD: String(process.env.SMTP_PASSWORD),
     FROM_NAME: String(process.env.FROM_NAME),
     FROM_EMAIL: String(process.env.FROM_EMAIL),
+    DEFAULT_USER_EMAIL: String(process.env.DEFAULT_USER_EMAIL),
+    DEFAULT_USER_PASSWORD: String(process.env.DEFAULT_USER_PASSWORD),
+    DEFAULT_USER_FIRST_NAME: String(process.env.DEFAULT_USER_FIRST_NAME),
+    DEFAULT_USER_LAST_NAME: String(process.env.DEFAULT_USER_LAST_NAME),
+    UPLOAD_DIR: String(process.env.UPLOAD_DIR),
 }
 
 export default EnvConfig;

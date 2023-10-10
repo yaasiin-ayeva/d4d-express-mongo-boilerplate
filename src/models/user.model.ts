@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import validator from "validator";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import toJSON from "./plugins/toJSON.plugin";
 import paginate from "./plugins/paginate.plugin";
 
-const userSchema = new mongoose.Schema({
+const schema = new mongoose.Schema({
   firstname: {
     type: String,
     required: true,
@@ -58,20 +58,20 @@ const userSchema = new mongoose.Schema({
   }
 );
 
-userSchema.plugin(toJSON);
-userSchema.plugin(paginate);
+schema.plugin(toJSON);
+schema.plugin(paginate);
 
-userSchema.statics.isEmailTaken = async function (email: string): Promise<boolean> {
+schema.statics.isEmailTaken = async function (email: string): Promise<boolean> {
   const user = await this.findOne({ email });
   return !!user;
 }
 
-userSchema.methods.isPasswordMatch = async function (password: string): Promise<boolean> {
+schema.methods.isPasswordMatch = async function (password: string): Promise<boolean> {
   const user = this;
   return bcrypt.compare(password, user.password);
 }
 
-userSchema.pre('save', async function (next) {
+schema.pre('save', async function (next) {
   const user = this;
   if (user.isModified('password')) {
     user.password = await bcrypt.hash(user.password, 8);
@@ -79,6 +79,6 @@ userSchema.pre('save', async function (next) {
   next();
 })
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', schema);
 
 export default User;

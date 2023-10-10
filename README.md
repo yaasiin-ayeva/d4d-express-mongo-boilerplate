@@ -24,8 +24,6 @@ npm run dev
 
 ## Project structure
 
-This project's architecture is based on this rest api boilerplate https://github.com/yaasiin-ayeva/d4d-express-mongo-boilerplate
-
 You can check the link above for more information.
 
 | Location              | Content                                            |
